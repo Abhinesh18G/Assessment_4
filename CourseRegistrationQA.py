@@ -39,6 +39,15 @@ def test_credit_limit():
 
     system = CourseSystem()
 
+    # Add extra course only for testing credit limit
+    system.courses["Cloud Computing"] = {
+        "credits": 4,
+        "semester": 5,
+        "prerequisite": None,
+        "time": "3PM",
+        "capacity": 2
+    }
+
     result, message = system.register(
         "S1",
         5,
@@ -67,8 +76,8 @@ def test_timetable_conflict():
     result, message = system.register(
         "S1",
         5,
-        ["Data Structures", "AI"],
-        ["ML"]
+        ["Data Structures"],
+        ["AI", "ML"]
     )
 
     assert not result
