@@ -42,11 +42,17 @@ def test_credit_limit():
     result, message = system.register(
         "S1",
         5,
-        ["Data Structures", "Statistics", "AI"],
-        ["ML", "AI"]
+        ["Data Structures"],
+        [
+            "Statistics",
+            "AI",
+            "ML",
+            "Cloud Computing"
+        ]
     )
 
     assert not result
+    assert message == "Credit limit exceeded"
 
     print("Credit limit: PASS")
 
@@ -55,15 +61,14 @@ def test_timetable_conflict():
 
     system = CourseSystem()
 
-    # Create a conflict by registering two courses
-    # with the same timetable.
+    # Make ML and AI have the same time
     system.courses["ML"]["time"] = "1PM"
 
     result, message = system.register(
         "S1",
         5,
         ["Data Structures", "AI"],
-        ["ML", "AI"]
+        ["ML"]
     )
 
     assert not result
@@ -76,29 +81,31 @@ def test_full_course():
 
     system = CourseSystem()
 
-    system.register(
+    result1, message1 = system.register(
         "S1",
         5,
         ["Data Structures"],
         ["AI"]
     )
 
-    system.register(
+    result2, message2 = system.register(
         "S2",
         5,
         ["Data Structures"],
         ["AI"]
     )
 
-    result, message = system.register(
+    result3, message3 = system.register(
         "S3",
         5,
         ["Data Structures"],
         ["AI"]
     )
 
-    assert not result
-    assert message == "Course is full"
+    assert result1
+    assert result2
+    assert not result3
+    assert message3 == "Course is full"
 
     print("Full course: PASS")
 
@@ -107,22 +114,23 @@ def test_duplicate_registration():
 
     system = CourseSystem()
 
-    system.register(
+    result1, message1 = system.register(
         "S1",
         5,
         ["Data Structures"],
         ["AI"]
     )
 
-    result, message = system.register(
+    result2, message2 = system.register(
         "S1",
         5,
         ["Data Structures"],
         ["AI"]
     )
 
-    assert not result
-    assert message == "Duplicate registration"
+    assert result1
+    assert not result2
+    assert message2 == "Duplicate registration"
 
     print("Duplicate registration: PASS")
 
@@ -173,7 +181,11 @@ def test_boundary_credit():
     )
 
     assert result
-    assert system.get_credits("S1") == 5
+
+    # AI = 2 credits
+    # ML = 1 credit
+    # Total = 3 credits
+    assert system.get_credits("S1") == 3
 
     print("Boundary credit value: PASS")
 
