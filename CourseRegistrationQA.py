@@ -39,25 +39,28 @@ def test_credit_limit():
 
     system = CourseSystem()
 
-    # Add extra course only for testing credit limit
-    system.courses["Cloud Computing"] = {
-        "credits": 4,
+    # Add temporary courses only for QA testing
+    system.courses["Test Credit A"] = {
+        "credits": 5,
         "semester": 5,
         "prerequisite": None,
-        "time": "3PM",
-        "capacity": 2
+        "time": "4PM",
+        "capacity": 10
+    }
+
+    system.courses["Test Credit B"] = {
+        "credits": 5,
+        "semester": 5,
+        "prerequisite": None,
+        "time": "5PM",
+        "capacity": 10
     }
 
     result, message = system.register(
         "S1",
         5,
-        ["Data Structures"],
-        [
-            "Statistics",
-            "AI",
-            "ML",
-            "Cloud Computing"
-        ]
+        [],
+        ["Test Credit A", "Test Credit B"]
     )
 
     assert not result
@@ -70,14 +73,28 @@ def test_timetable_conflict():
 
     system = CourseSystem()
 
-    # Make ML and AI have the same time
-    system.courses["ML"]["time"] = "1PM"
+    # Add temporary courses with the same timetable
+    system.courses["Test Time A"] = {
+        "credits": 2,
+        "semester": 5,
+        "prerequisite": None,
+        "time": "1PM",
+        "capacity": 10
+    }
+
+    system.courses["Test Time B"] = {
+        "credits": 2,
+        "semester": 5,
+        "prerequisite": None,
+        "time": "1PM",
+        "capacity": 10
+    }
 
     result, message = system.register(
         "S1",
         5,
-        ["Data Structures"],
-        ["AI", "ML"]
+        [],
+        ["Test Time A", "Test Time B"]
     )
 
     assert not result
@@ -182,19 +199,40 @@ def test_boundary_credit():
 
     system = CourseSystem()
 
+    # Add a temporary 2-credit course.
+    # Selected courses will total exactly 8 credits:
+    #
+    # Data Structures = 2
+    # Statistics      = 2
+    # AI              = 2
+    # Test Boundary   = 2
+    #
+    # Total = 8
+
+    system.courses["Test Boundary"] = {
+        "credits": 2,
+        "semester": 5,
+        "prerequisite": None,
+        "time": "4PM",
+        "capacity": 10
+    }
+
     result, message = system.register(
         "S1",
         5,
-        ["Data Structures", "Statistics"],
-        ["AI", "ML"]
+        ["Data Structures", "AI"],
+        [
+            "Data Structures",
+            "Statistics",
+            "AI",
+            "Test Boundary"
+        ]
     )
 
     assert result
+    assert message == "Registration successful"
 
-    # AI = 2 credits
-    # ML = 1 credit
-    # Total = 3 credits
-    assert system.get_credits("S1") == 3
+    assert system.get_credits("S1") == 8
 
     print("Boundary credit value: PASS")
 
